@@ -15,6 +15,7 @@ git rm .gitignore
 git rm --cached *.sh
 
 composer install --optimize-autoloader
+git add vendor
 git rm composer.*
 
 mkdir -p library/ABDS/
@@ -23,7 +24,6 @@ git mv vendor library/ABDS/
 git mv *.md library/ABDS/
 git mv *.xml library/ABDS/
 
-git add vendor
 git commit -am "Tag $RELEASE_VERSION"
 git tag $RELEASE_VERSION
 git push --tags
