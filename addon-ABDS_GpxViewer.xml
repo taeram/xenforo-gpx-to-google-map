@@ -7,7 +7,7 @@
   <admin_template_modifications/>
   <code_events/>
   <code_event_listeners>
-    <listener event_id="template_hook" execute_order="10" callback_class="ABDS_GpxViewer_Listener" callback_method="template_hook" active="1" description="Listen to template hooks"/>
+    <listener event_id="template_hook" execute_order="10" callback_class="ABDS_GpxViewer_Listener" callback_method="template_hook" active="1" hint="" description="Listen to template hooks"/>
   </code_event_listeners>
   <cron/>
   <email_templates/>
@@ -45,12 +45,12 @@
     <interface_groups/>
   </permissions>
   <phrases>
-    <phrase title="option_group_abds_gpxviewer" version_id="1" version_string="1.0.0"><![CDATA[ABDS GPX Viewer]]></phrase>
-    <phrase title="option_group_abds_gpxviewer_description" version_id="1" version_string="1.0.0"><![CDATA[ABDS GPX Viewer Settings]]></phrase>
     <phrase title="option_abds_gpxviewer_button_colour" version_id="1" version_string="1.0.0"><![CDATA[Button/Link Colour]]></phrase>
     <phrase title="option_abds_gpxviewer_google_maps_api_key" version_id="1" version_string="1.0.0"><![CDATA[Google Maps API Key]]></phrase>
     <phrase title="option_abds_gpxviewer_marker_colour" version_id="1" version_string="1.0.0"><![CDATA[Map Marker Colour]]></phrase>
     <phrase title="option_abds_gpxviewer_marker_colour_selected" version_id="1" version_string="1.0.0"><![CDATA[Map Marker Colour (selected)]]></phrase>
+    <phrase title="option_group_abds_gpxviewer" version_id="1" version_string="1.0.0"><![CDATA[ABDS GPX Viewer]]></phrase>
+    <phrase title="option_group_abds_gpxviewer_description" version_id="1" version_string="1.0.0"><![CDATA[ABDS GPX Viewer Settings]]></phrase>
   </phrases>
   <route_prefixes/>
   <style_properties/>
