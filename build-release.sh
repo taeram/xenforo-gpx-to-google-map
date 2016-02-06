@@ -18,7 +18,10 @@ composer install --optimize-autoloader
 git rm composer.*
 
 mkdir -p library/ABDS/
-git mv * library/ABDS/
+git mv GpxViewer library/ABDS/
+git mv vendor library/ABDS/
+git mv *.md library/ABDS/
+git mv *.xml library/ABDS/
 
 git add vendor
 git commit -am "Tag $RELEASE_VERSION"
