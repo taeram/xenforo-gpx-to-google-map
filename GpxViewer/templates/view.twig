@@ -82,14 +82,17 @@
             if (locations.length == 0) {
                 return;
             }
+
             // Disable the slider
             setSliderDisabled(true);
+
             // Initialize the map
             var mapOptions = {
                 center: new google.maps.LatLng(locations[0].latitude, locations[0].longitude),
                 zoom: 12
             };
             map = new google.maps.Map(document.getElementById(mapCanvasId), mapOptions);
+
             // Add the markers to the map
             for (var i in locations) {
                 markers.push(new google.maps.Marker({
@@ -98,6 +101,7 @@
                     icon: markerIcon
                 }));
             }
+
             // Add the track (polyline) to the map
             var paths = [];
             for (var i in locations) {
@@ -109,10 +113,12 @@
                 strokeColor: "{{ marker_colour }}",
                 strokeWeight: 3
             });
+
             // Enable the slider
             setSliderDisabled(false);
         }
         google.maps.event.addDomListener(window, "load", initializeGpxMap);
+
         // Make the map full width
         var isEmbiggened = false;
         function embiggenMap() {
@@ -126,27 +132,33 @@
                 height = "800px";
             }
             isEmbiggened = !isEmbiggened;
+
             // Resize the map
             document.getElementById(mapCanvasId).style.width = width;
             document.getElementById(mapCanvasId).style.height = height;
             google.maps.event.trigger(map, "resize");
+
             // Recenter the map
             var selectedMarker = markers[selectedMarkerId];
             map.setCenter(selectedMarker.getPosition());
         }
         google.maps.event.addDomListener(document.getElementById(embiggenButtonId), "click", embiggenMap);
+
         // Control which point on the map is selected
         var selectedMarkerId = 0;
         function slider(e) {
             // Disable the slider
             setSliderDisabled(true);
+
             // Get the selected marker
             var newSelectedMarkerId = parseInt(document.getElementById(sliderId).value, 10);
             var marker = markers[newSelectedMarkerId];
+
             // Recenter the map on the selected marker if it is off screen
             if (!map.getBounds().contains(marker.getPosition())) {
                 map.panTo(marker.getPosition());
             }
+
             // Convert all marker icons to selected/unselected depending on the direction the slider has moved
             if (newSelectedMarkerId > selectedMarkerId) {
                 for (var i=selectedMarkerId; i <= newSelectedMarkerId; i++) {
@@ -157,18 +169,22 @@
                     markers[i].setIcon(markerIcon);
                 }
             }
+
             // Add the time to the page
             if (locations[newSelectedMarkerId].time) {
                 document.getElementById(timeId).innerHTML = locations[newSelectedMarkerId].time;
             } else {
                 document.getElementById(timeId).innerHTML = "&nbsp;";
             }
+
             // Enable the slider
             setSliderDisabled(false);
+
             // Set the new selected marker id
             selectedMarkerId = newSelectedMarkerId;
         }
         google.maps.event.addDomListener(document.getElementById(sliderId), "change", slider);
+
         function setSliderDisabled(isDisabled) {
             if (isDisabled) {
                 // Disable the slider

@@ -5,8 +5,8 @@ class ABDS_GpxViewer_Listener
 
     static $twig;
 
-	public static function template_hook($hookName, &$contents, array $hookParams, XenForo_Template_Abstract $template) {
-		if ($hookName == "message_content") {
+    public static function template_hook($hookName, &$contents, array $hookParams, XenForo_Template_Abstract $template) {
+        if ($hookName == "message_content") {
             $numAttachments = $hookParams['message']['attach_count'];
             if ($numAttachments > 0) {
 
@@ -27,23 +27,26 @@ class ABDS_GpxViewer_Listener
                 if (!$twig) {
                     require_once __DIR__ . '/../vendor/autoload.php';
 
-            		\Twig_Autoloader::register();
-            		$loader = new \Twig_Loader_Filesystem(__DIR__ . '/templates');
-            		static::$twig = new \Twig_Environment($loader, array(
-            		    'debug' => $config['debug']
-            		));
+                    \Twig_Autoloader::register();
+                    $loader = new \Twig_Loader_Filesystem(__DIR__ . '/templates');
+                    static::$twig = new \Twig_Environment($loader, array(
+                        'debug' => $config['debug']
+                    ));
                 }
 
                 // Load the visitor's information
                 $visitor = \XenForo_Visitor::getInstance();
+
+                // Load the plugin options
+                $options = \XenForo_Application::get('options');
 
                 // Iterate through all of the attachments
                 $htmlPrefix = null;
                 $htmlPostfix = null;
                 foreach ($attachments as $attachment) {
                     // Get the path to the attachment
-            		$model = new \XenForo_Model_Attachment();
-            		$filePath = $model->getAttachmentDataFilePath($attachment);
+                    $model = new \XenForo_Model_Attachment();
+                    $filePath = $model->getAttachmentDataFilePath($attachment);
 
                     // Get the gpx xml
                     $gpxString = file_get_contents($filePath);
@@ -74,10 +77,10 @@ class ABDS_GpxViewer_Listener
                             'attachment_filename' => $attachment['filename'],
                             'locations' => $locations,
                             'initial_time' => $locations[0]['time'],
-                            'button_colour' => '#4380D3',
-			                'google_maps_api_key' => '',
-			                'marker_colour' => '#4A71A6',
-                            'marker_colour_selected' => '#000B40'
+                            'button_colour' => $options->abds_gpxviewer_button_colour,
+                            'google_maps_api_key' => $options->abds_gpxviewer_google_maps_api_key,
+                            'marker_colour' => $options->abds_gpxviewer_marker_colour,
+                            'marker_colour_selected' => $options->abds_gpxviewer_marker_colour_selected,
                         ));
                     } catch (Exception $e) {
                         $htmlPostfix .= "<br /><br /><small>(Bad XML in GPX file " . $attachment['filename'] . ", cannot display as map)</small>";
@@ -86,8 +89,8 @@ class ABDS_GpxViewer_Listener
 
                 $contents = $htmlPrefix . $contents . $htmlPostfix;
             }
-		}
-	}
+        }
+    }
 
     /**
      * Convert the GPX tile to a human readable version
