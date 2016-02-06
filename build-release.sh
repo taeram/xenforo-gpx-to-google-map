@@ -18,11 +18,11 @@ composer install --optimize-autoloader
 git rm composer.*
 
 mkdir -p library/ABDS/
-git mv GpxViewer library/ABDS/
+git mv * library/ABDS/
 
 git add vendor
 git commit -am "Tag $RELEASE_VERSION"
 git tag $RELEASE_VERSION
 git push --tags
 
-rm -f "$0" && git checkout $CURRENT_MASTER_SHA && git branch -D master && git checkout -b master
+echo "rm -f $( basename $0 ) && git checkout $CURRENT_MASTER_SHA && git branch -D master && git checkout -b master"
