@@ -22,7 +22,6 @@ mkdir -p library/ABDS/
 git mv GpxViewer library/ABDS/
 git mv vendor library/ABDS/
 git mv *.md library/ABDS/
-git mv *.xml library/ABDS/
 
 git commit -am "Tag $RELEASE_VERSION"
 git tag $RELEASE_VERSION
