@@ -11,20 +11,25 @@ CURRENT_MASTER_SHA=$( git log -1 | grep commit | awk '{print $2}' )
 git tag -d $RELEASE_VERSION
 git push origin :refs/tags/$RELEASE_VERSION
 
+TMP_DIR=$( mktemp -d )
+git clone git@github.com:taeram/xenforo-gpx-to-google-map.git $TMP_DIR
+
+cd $TMP_DIR
 git rm .gitignore
-git rm --cached *.sh
+git rm *.sh
 
 composer install --optimize-autoloader
 git add vendor
 git rm composer.*
 
-mkdir -p library/ABDS/
-git mv GpxViewer library/ABDS/
-git mv vendor library/ABDS/
-git mv *.md library/ABDS/
+mkdir -p ABDS/
+git mv GpxViewer ABDS/
+git mv vendor ABDS/
+git mv *.md ABDS/
 
 git commit -am "Tag $RELEASE_VERSION"
 git tag $RELEASE_VERSION
 git push --tags
 
-echo "rm -f $( basename $0 ) && git checkout $CURRENT_MASTER_SHA && git branch -D master && git checkout -b master"
+cd /tmp
+rm -rf $TMP_DIR
