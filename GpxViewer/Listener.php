@@ -57,6 +57,12 @@ class ABDS_GpxViewer_Listener
                 $filePath = $model->getAttachmentDataFilePath($attachment);
 
                 // Get the gpx xml
+                if (!file_exists($filePath)) {
+                    if ($config['debug']) {
+                        echo "Attachment " . $attachment['attachment_id'] ." file does not exist. Skipping.";
+                    }
+                    return;
+                }
                 $gpxString = file_get_contents($filePath);
                 if (!$gpxString) {
                     if ($config['debug']) {
