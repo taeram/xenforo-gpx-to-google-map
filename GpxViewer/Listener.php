@@ -57,7 +57,7 @@ class ABDS_GpxViewer_Listener
                     if ($config['debug']) {
                         echo "Attachment " . $attachment['attachment_id'] ." has no file data, or was not found. Skipping.";
                     }
-                    continue;
+                    return;
                 }
 
                 $htmlPrefix = null;
@@ -74,7 +74,7 @@ class ABDS_GpxViewer_Listener
                         if ($config['debug']) {
                             echo "Attachment " . $attachment['attachment_id'] ." has a .gpx extension, but doesn't appear to be valid GPX, skipping.";
                         }
-                        continue;
+                        return;
                     }
 
                     $htmlPrefix .= static::$twig->render('view.twig', array(
