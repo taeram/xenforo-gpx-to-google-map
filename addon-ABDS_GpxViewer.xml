@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="ABDS_GpxViewer" title="Alberta Dual Sport: GPX Viewer" version_string="1.0.0" version_id="2016030501" url="https://github.com/taeram/xenforo-gpx-to-google-map" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+<addon addon_id="ABDS_GpxViewer" title="Alberta Dual Sport: GPX Viewer" version_string="1.1.0" version_id="2016030501" url="https://github.com/taeram/xenforo-gpx-to-google-map" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -45,7 +45,7 @@
     <interface_groups/>
   </permissions>
   <phrases>
-    <phrase title="option_abds_gpxviewer_button_colour" version_id="1" version_string="1.0.0"><![CDATA[Button/Link Colour]]></phrase>
+    <phrase title="option_abds_gpxviewer_button_colour" version_id="1" version_string="1.0.0"><![CDATA[Toggle Map Size Link Colour]]></phrase>
     <phrase title="option_abds_gpxviewer_google_maps_api_key" version_id="1" version_string="1.0.0"><![CDATA[Google Maps API Key]]></phrase>
     <phrase title="option_abds_gpxviewer_marker_colour" version_id="1" version_string="1.0.0"><![CDATA[Map Marker Colour]]></phrase>
     <phrase title="option_abds_gpxviewer_marker_colour_selected" version_id="1" version_string="1.0.0"><![CDATA[Map Marker Colour (selected)]]></phrase>

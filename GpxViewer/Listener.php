@@ -11,6 +11,13 @@ class ABDS_GpxViewer_Listener
     static $twig;
 
     /**
+     * Have we already added the Google Maps JavaScript to the page?
+     *
+     * @var boolean
+     */
+    static $isMapLoaded;
+
+    /**
      * Add the first .gpx file to the post as an embedded Google Map
      *
      * @param string $hookName The hook name
@@ -42,7 +49,7 @@ class ABDS_GpxViewer_Listener
                 $options = \XenForo_Application::get('options');
 
                 // Inialize twig
-                if (!$twig) {
+                if (!static::$twig) {
                     require_once __DIR__ . '/../vendor/autoload.php';
 
                     \Twig_Autoloader::register();
@@ -87,7 +94,7 @@ class ABDS_GpxViewer_Listener
                         }
                         return;
                     }
-
+                    
                     $htmlPrefix .= static::$twig->render('view.twig', array(
                         'attachment_id' => $attachment['attachment_id'],
                         'attachment_filename' => $attachment['filename'],
@@ -97,7 +104,11 @@ class ABDS_GpxViewer_Listener
                         'google_maps_api_key' => $options->abds_gpxviewer_google_maps_api_key,
                         'marker_colour' => $options->abds_gpxviewer_marker_colour,
                         'marker_colour_selected' => $options->abds_gpxviewer_marker_colour_selected,
+                        'is_map_loaded' => static::$isMapLoaded
                     ));
+
+                    // Mark the map as having been loaded on this page
+                    static::$isMapLoaded = true;
                 } catch (Exception $e) {
                     $htmlPostfix .= "<br /><br /><small>(Bad XML in GPX file " . $attachment['filename'] . ", cannot display as map)</small>";
                 }

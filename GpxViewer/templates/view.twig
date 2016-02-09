@@ -1,51 +1,53 @@
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}"></script>
-<style type="text/css">
-    .gpx-map {
-        border-radius: 5px;
-        border: 1px solid #404040;
-        float: right;
-        margin: 10px;
-        margin-left: 20px;
-        padding: 0px 10px;
-        padding-bottom: 10px;
-    }
-    .gpx-map-canvas {
-        height: 400px;
-        margin-bottom: 5px;
-        width: 400px;
-    }
-    .gpx-buttons-container {
-        text-align: center;
-    }
-    .gpx-slider {
-        width: 100%;
-    }
-    .gpx-slider-disabled {
-        opacity: 0.5;
-    }
-    .gpx-time {
-        text-align: center;
-        margin: 5px 0px;
-    }
-    .gpx-button {
-        background: none;
-        border: 0 none;
-        cursor: pointer;
-        color: {{ button_color }};
-    }
-</style>
-<!--[if lt IE 10 ]>
-<style type="text/css">
-    .gpx-slider {
-        display: none;
-    }
-</style>
-<![endif]-->
+{% if not is_map_loaded %}
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}"></script>
+    <style type="text/css">
+        .gpx-map {
+            border-radius: 5px;
+            border: 1px solid #404040;
+            float: right;
+            margin: 10px;
+            margin-left: 20px;
+            padding: 0px 10px;
+            padding-bottom: 10px;
+        }
+        .gpx-map-canvas {
+            height: 400px;
+            margin-bottom: 5px;
+            width: 400px;
+        }
+        .gpx-buttons-container {
+            text-align: center;
+        }
+        .gpx-slider {
+            width: 100%;
+        }
+        .gpx-slider-disabled {
+            opacity: 0.5;
+        }
+        .gpx-time {
+            text-align: center;
+            margin: 5px 0px;
+        }
+        .gpx-button {
+            background: none;
+            border: 0 none;
+            cursor: pointer;
+            color: {{ button_colour }};
+        }
+    </style>
+    <!--[if lt IE 10 ]>
+    <style type="text/css">
+        .gpx-slider {
+            display: none;
+        }
+    </style>
+    <![endif]-->
+{% endif %}
 
 <div class="gpx-map">
     <h3 class="title" style="border: 0 none">{{ attachment_filename }}</h3>
     <div class="gpx-map-canvas" id="map-canvas-{{ attachment_id }}"></div>
-    <input class="gpx-slider" id="slider-{{ attachment-id }}" type="range" min="0" max="{{ locations|length - 1 }}" step="1" value="0" />
+    <input class="gpx-slider" id="slider-{{ attachment_id }}" type="range" min="0" max="{{ locations|length - 1 }}" step="1" value="0" />
     <div class="gpx-time" id="time-{{ attachment_id }}">
         {{ initial_time }}
     </div>
@@ -54,147 +56,231 @@
     </div>
 </div>
 <script type="text/javascript">
-    var map{{ attachment_id }} = function () {
-        var embiggenButtonId = "embiggen-{{ attachment_id }}";
-        var mapCanvasId = "map-canvas-{{ attachment_id }}";
-        var sliderId = "slider-{{ attachment-id }}";
-        var timeId = "time-{{ attachment_id }}";
-        var locations = {{ locations|json_encode()|raw }};
-        var map = null;
-        var markers = [];
-        var markerIcon = {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 3,
-            strokeColor: "{{ marker_colour }}",
-            fillColor: "{{ marker_colour }}",
-            fillOpacity: 1
-        }
-        var markerIconSelected = {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 3,
-            strokeColor: "{{ marker_colour_selected }}",
-            fillColor: "{{ marker_colour_selected }}",
-            fillOpacity: 1
-        }
-        var track = null;
-        // Render the map on the page
-        function initializeGpxMap() {
-            if (locations.length == 0) {
+    var ABDSMap = {
+        /**
+         * The map locations
+         *
+         * @type array
+         */
+        locations: [],
+
+        /**
+         * The google map
+         *
+         * @type google.maps.Map
+         */
+        map: null,
+
+        /**
+         * The map markers
+         *
+         * @type array
+         */
+        markers: [],
+
+        /**
+         * The map canvas id
+         *
+         * @type string
+         */
+        mapCanvasId: null,
+
+        /**
+         * The marker icon
+         *
+         * @type object
+         */
+        markerIcon: null,
+
+        /**
+         * The selected marker icon
+         *
+         * @type object
+         */
+        markerIconSelected: null,
+
+        /**
+         * The track polyline
+         *
+         * @type google.maps.Polyline
+         */
+        track: null,
+
+        /**
+         * The toggle map size button
+         *
+         * @type string
+         */
+        embiggenButtonId: null,
+
+        /**
+         * Is the map expanded?
+         *
+         * @type boolean
+         */
+        isMapEmbiggened: false,
+
+        /**
+         * The slider id
+         *
+         * @type string
+         */
+        sliderId: null,
+
+        /**
+         * Which marker on the map is currently selected?
+         *
+         * @type integer
+         */
+        selectedMarkerId: 0,
+
+        /**
+         * Render the map on the page
+         */
+        initialize: function() {
+            if (this.locations.length == 0) {
                 return;
             }
 
-            // Disable the slider
-            setSliderDisabled(true);
+            this.disableSlider();
 
             // Initialize the map
-            var mapOptions = {
-                center: new google.maps.LatLng(locations[0].latitude, locations[0].longitude),
+            this.map = new google.maps.Map(document.getElementById(this.mapCanvasId), {
+                center: new google.maps.LatLng(this.locations[0].latitude, this.locations[0].longitude),
                 zoom: 12
+            });
+
+            // Setup the marker icons
+            this.markerIcon = {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 3,
+                strokeColor: "{{ marker_colour }}",
+                fillColor: "{{ marker_colour }}",
+                fillOpacity: 1
             };
-            map = new google.maps.Map(document.getElementById(mapCanvasId), mapOptions);
+            this.markerIconSelected = {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 3,
+                strokeColor: "{{ marker_colour_selected }}",
+                fillColor: "{{ marker_colour_selected }}",
+                fillOpacity: 1
+            };
 
             // Add the markers to the map
-            for (var i in locations) {
-                markers.push(new google.maps.Marker({
-                    position: new google.maps.LatLng(locations[i].latitude, locations[i].longitude),
-                    map: map,
-                    icon: markerIcon
+            for (var i in this.locations) {
+                this.markers.push(new google.maps.Marker({
+                    position: new google.maps.LatLng(this.locations[i].latitude, this.locations[i].longitude),
+                    map: this.map,
+                    icon: this.markerIcon
                 }));
             }
 
             // Add the track (polyline) to the map
             var paths = [];
-            for (var i in locations) {
-                paths.push(new google.maps.LatLng(locations[i].latitude, locations[i].longitude));
+            for (var i in this.locations) {
+                paths.push(new google.maps.LatLng(this.locations[i].latitude, this.locations[i].longitude));
             }
-            track = new google.maps.Polyline({
-                map: map,
+            this.track = new google.maps.Polyline({
+                map: this.map,
                 path: paths,
                 strokeColor: "{{ marker_colour }}",
                 strokeWeight: 3
             });
 
-            // Enable the slider
-            setSliderDisabled(false);
-        }
-        google.maps.event.addDomListener(window, "load", initializeGpxMap);
+            this.enableSlider();
 
-        // Make the map full width
-        var isEmbiggened = false;
-        function embiggenMap() {
-            if (isEmbiggened) {
+            // Bind the events
+            google.maps.event.addDomListener(document.getElementById(this.embiggenButtonId), "click", this.embiggenMap.bind(this));
+            google.maps.event.addDomListener(document.getElementById(this.sliderId), "change", this.slider.bind(this));
+        },
+
+        /**
+         * Disable the slider
+         */
+        disableSlider: function () {
+            document.getElementById(this.sliderId).disabled = true;
+            document.getElementById(this.sliderId).className = "gpx-slider gpx-slider-disabled";
+        },
+
+        /**
+         * Enaable the slider
+         */
+        enableSlider: function() {
+            document.getElementById(this.sliderId).disabled = false;
+            document.getElementById(this.sliderId).className = "gpx-slider";
+        },
+
+        // Control which point on the map is selected
+        slider: function() {
+            this.disableSlider();
+
+            // Get the selected marker
+            var newSelectedMarkerId = parseInt(document.getElementById(this.sliderId).value, 10);
+            var marker = this.markers[newSelectedMarkerId];
+
+            // Recenter the map on the selected marker if it is off screen
+            if (!this.map.getBounds().contains(marker.getPosition())) {
+                this.map.panTo(marker.getPosition());
+            }
+
+            // Convert all marker icons to selected/unselected depending on the direction the slider has moved
+            if (newSelectedMarkerId > this.selectedMarkerId) {
+                for (var i=this.selectedMarkerId; i <= newSelectedMarkerId; i++) {
+                    this.markers[i].setIcon(this.markerIconSelected);
+                }
+            } else {
+                for (var i=this.selectedMarkerId; i > newSelectedMarkerId; i--) {
+                    this.markers[i].setIcon(this.markerIcon);
+                }
+            }
+
+            // Add the time to the page
+            if (this.locations[newSelectedMarkerId].time) {
+                document.getElementById(this.timeId).innerHTML = this.locations[newSelectedMarkerId].time;
+            } else {
+                document.getElementById(this.timeId).innerHTML = "&nbsp;";
+            }
+
+            // Enable the slider
+            this.enableSlider();
+
+            // Set the new selected marker id
+            this.selectedMarkerId = newSelectedMarkerId;
+        },
+
+        /**
+         * Make the map full width
+         */
+        embiggenMap: function() {
+            if (this.isMapEmbiggened) {
                 // Make it less biggened
                 width = "400px";
                 height = "400px";
             } else {
                 // Embiggen it
-                width = (document.getElementById(mapCanvasId).parentNode.parentNode.offsetWidth - 40) + "px";
+                width = (document.getElementById(this.mapCanvasId).parentNode.parentNode.offsetWidth - 40) + "px";
                 height = "800px";
             }
-            isEmbiggened = !isEmbiggened;
+            this.isMapEmbiggened = !this.isMapEmbiggened;
 
             // Resize the map
-            document.getElementById(mapCanvasId).style.width = width;
-            document.getElementById(mapCanvasId).style.height = height;
-            google.maps.event.trigger(map, "resize");
+            document.getElementById(this.mapCanvasId).style.width = width;
+            document.getElementById(this.mapCanvasId).style.height = height;
+            google.maps.event.trigger(this.map, "resize");
 
             // Recenter the map
-            var selectedMarker = markers[selectedMarkerId];
-            map.setCenter(selectedMarker.getPosition());
+            var selectedMarker = this.markers[this.selectedMarkerId];
+            this.map.setCenter(selectedMarker.getPosition());
         }
-        google.maps.event.addDomListener(document.getElementById(embiggenButtonId), "click", embiggenMap);
+    };
 
-        // Control which point on the map is selected
-        var selectedMarkerId = 0;
-        function slider(e) {
-            // Disable the slider
-            setSliderDisabled(true);
-
-            // Get the selected marker
-            var newSelectedMarkerId = parseInt(document.getElementById(sliderId).value, 10);
-            var marker = markers[newSelectedMarkerId];
-
-            // Recenter the map on the selected marker if it is off screen
-            if (!map.getBounds().contains(marker.getPosition())) {
-                map.panTo(marker.getPosition());
-            }
-
-            // Convert all marker icons to selected/unselected depending on the direction the slider has moved
-            if (newSelectedMarkerId > selectedMarkerId) {
-                for (var i=selectedMarkerId; i <= newSelectedMarkerId; i++) {
-                    markers[i].setIcon(markerIconSelected);
-                }
-            } else {
-                for (var i=selectedMarkerId; i > newSelectedMarkerId; i--) {
-                    markers[i].setIcon(markerIcon);
-                }
-            }
-
-            // Add the time to the page
-            if (locations[newSelectedMarkerId].time) {
-                document.getElementById(timeId).innerHTML = locations[newSelectedMarkerId].time;
-            } else {
-                document.getElementById(timeId).innerHTML = "&nbsp;";
-            }
-
-            // Enable the slider
-            setSliderDisabled(false);
-
-            // Set the new selected marker id
-            selectedMarkerId = newSelectedMarkerId;
-        }
-        google.maps.event.addDomListener(document.getElementById(sliderId), "change", slider);
-
-        function setSliderDisabled(isDisabled) {
-            if (isDisabled) {
-                // Disable the slider
-                document.getElementById(sliderId).disabled = true;
-                document.getElementById(sliderId).className = "gpx-slider gpx-slider-disabled";
-            } else {
-                // Enable the slider
-                document.getElementById(sliderId).disabled = false;
-                document.getElementById(sliderId).className = "gpx-slider";
-            }
-        }
-    }();
+    (function(){
+        var map = jQuery.extend(true, {}, ABDSMap);
+        map.mapCanvasId = "map-canvas-{{ attachment_id }}";
+        map.embiggenButtonId = "embiggen-{{ attachment_id }}";
+        map.sliderId = "slider-{{ attachment_id }}";
+        map.timeId = "time-{{ attachment_id }}";
+        map.locations = {{ locations|json_encode()|raw }};
+        google.maps.event.addDomListener(window, "load", map.initialize.bind(map));
+    })();
 </script>
