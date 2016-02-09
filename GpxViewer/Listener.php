@@ -3,6 +3,11 @@
 class ABDS_GpxViewer_Listener
 {
 
+    /**
+     * The twig environment
+     *
+     * @var \Twig_Environment
+     */
     static $twig;
 
     /**
